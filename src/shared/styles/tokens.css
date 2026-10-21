@@ -1,0 +1,278 @@
+/*
+ * Ghotok design system: colour tokens (light and dark), type pairing for
+ * English and Bangla, the Tailwind v4 theme mapping and a few shared
+ * component classes. Imported by the website and the admin panel right after
+ * `@import "tailwindcss";`.
+ */
+
+/* Design tokens from the Ghotok design (rose and gold, light and dark). */
+:root,
+[data-theme='light'] {
+  --bg: #fff9f5;
+  --surface: #ffffff;
+  --surface2: #f8e6e8;
+  --ink: #2b1b22;
+  --muted: #6e545c;
+  --line: #ebd9d6;
+  --rose: #8e2748;
+  --rose-text: #8e2748;
+  --on-rose: #ffffff;
+  --gold: #c79a4b;
+  --gold-text: #9a6f25;
+  --sage: #3f6b52;
+  --sage-bg: #e1efe6;
+  --panel: #3b1624;
+  --on-panel: #fff3f0;
+  --panel-muted: #e4cbd0;
+  --panel-gold: #e3be7b;
+  --panel-line: #6a3a4a;
+  --warn: #6b4a00;
+  --warn-bg: #fff1d6;
+  --danger: #b42318;
+  --danger-bg: #fdecea;
+  --shadow: 0 28px 60px -28px rgba(70, 25, 45, 0.35);
+  /* Chart series, in this fixed order. Checked for colour-blind separation and
+     3:1 contrast on --surface (light and dark sets each validated as a set). */
+  --chart-1: #b03a62;
+  --chart-2: #2a78d6;
+  --chart-3: #c98500;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #170e13;
+  --surface: #231620;
+  --surface2: #2f1c28;
+  --ink: #f8ecea;
+  --muted: #c9b3b9;
+  --line: #3c2833;
+  --rose: #e58aa3;
+  --rose-text: #f0a3b8;
+  --on-rose: #2b1b22;
+  --gold: #c79a4b;
+  --gold-text: #e0bc78;
+  --sage: #8fd0a8;
+  --sage-bg: #1f3a2c;
+  --panel: #2a1621;
+  --on-panel: #fff3f0;
+  --panel-muted: #d9c2c8;
+  --panel-gold: #e3be7b;
+  --panel-line: #4e3341;
+  --warn: #f5d48a;
+  --warn-bg: #3a2e12;
+  --danger: #ff9c8f;
+  --danger-bg: #3b1a17;
+  --shadow: 0 28px 60px -28px rgba(0, 0, 0, 0.7);
+  --chart-1: #d55181;
+  --chart-2: #3987e5;
+  --chart-3: #c98500;
+  color-scheme: dark;
+}
+
+/* English pairs Playfair Display with Manrope; Bangla pairs Noto Serif Bengali with Hind Siliguri. */
+html {
+  /* The website provides --font-* through next/font; the admin panel loads the
+     same families from Google Fonts, so the fallbacks name them directly. */
+  --display:
+    var(--font-playfair, 'Playfair Display'), var(--font-noto-serif-bn, 'Noto Serif Bengali'), Georgia, serif;
+  --body: var(--font-manrope, 'Manrope'), var(--font-hind, 'Hind Siliguri'), system-ui, sans-serif;
+  --lh-hero: 1.06;
+  --lh-title: 1.15;
+}
+html[lang='bn'] {
+  --display: var(--font-noto-serif-bn), var(--font-playfair), Georgia, serif;
+  --body: var(--font-hind), var(--font-manrope), system-ui, sans-serif;
+  --lh-hero: 1.4;
+  --lh-title: 1.4;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-rose: var(--rose);
+  --color-rose-text: var(--rose-text);
+  --color-on-rose: var(--on-rose);
+  --color-gold: var(--gold);
+  --color-gold-text: var(--gold-text);
+  --color-sage: var(--sage);
+  --color-sage-bg: var(--sage-bg);
+  --color-panel: var(--panel);
+  --color-on-panel: var(--on-panel);
+  --color-panel-muted: var(--panel-muted);
+  --color-panel-gold: var(--panel-gold);
+  --color-panel-line: var(--panel-line);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --font-display: var(--display);
+  --font-body: var(--body);
+  --shadow-card: var(--shadow);
+  --leading-hero: var(--lh-hero);
+  --leading-title: var(--lh-title);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 3px solid #c98a3c;
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: var(--surface2);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 28px;
+    }
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--gold-text);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .kicker::before {
+    content: '';
+    width: 36px;
+    height: 1.5px;
+    background: var(--gold);
+    flex: none;
+  }
+
+  .field-input {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 10px 16px;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+  }
+  .field-input:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+  .field-input[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+  textarea.field-input {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  select.field-input {
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+      linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 20px) 50%,
+      calc(100% - 15px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 40px;
+  }
+
+  .prose-cms {
+    line-height: 1.8;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .prose-cms h2 {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 32px 0 12px;
+    line-height: var(--lh-title);
+  }
+  .prose-cms h3 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 24px 0 8px;
+  }
+  .prose-cms p {
+    margin: 0 0 14px;
+    color: var(--muted);
+  }
+  .prose-cms ul,
+  .prose-cms ol {
+    margin: 0 0 16px;
+    padding-left: 22px;
+    color: var(--muted);
+  }
+  .prose-cms ul {
+    list-style: disc;
+  }
+  .prose-cms ol {
+    list-style: decimal;
+  }
+  .prose-cms li {
+    margin-bottom: 6px;
+  }
+  .prose-cms strong {
+    color: var(--ink);
+  }
+  .prose-cms a {
+    color: var(--rose-text);
+    text-decoration: underline;
+  }
+  .prose-cms em {
+    color: var(--muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Letter-spacing breaks Bangla conjuncts, so tracking is turned off for Bangla text.
+   (Unlayered, so it wins over Tailwind's tracking-* utilities.) */
+html[lang='bn'] .kicker,
+html[lang='bn'] [class*='tracking-'] {
+  letter-spacing: normal;
+}
