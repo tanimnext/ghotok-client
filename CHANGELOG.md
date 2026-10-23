@@ -8,6 +8,26 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- **Better Auth runs in this app** (`src/server/auth.js`, `/api/auth/*`) with the MongoDB
+  adapter and the admin plugin, against the same database as ghotok-server. ghotok-server reads
+  the session cookie with the shared `BETTER_AUTH_SECRET`.
+- **Sign-up and sign-in are email + password only.** Removed one-time codes, SMS, Google,
+  email verification and "forgot password" (pages, components and dictionary keys).
+- **The SSLCommerz checkout runs in this app** (`src/server/checkout.js`, `/api/checkout`,
+  `/api/checkout/sslcommerz/return` and `/ipn`): it records payments, credits connections once,
+  writes the ledger entry and the notification in the documents ghotok-server reads.
+- The admin dashboard creates accounts and sets passwords through Better Auth's admin plugin.
+- Deactivating an account asks for the password again.
+- `/api/*` requests not handled here are forwarded to ghotok-server by a `fallback` rewrite.
+
+### Added
+
+- `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` and `SSLCOMMERZ_*` settings; the
+  `mongodb` and `react-is` dependencies.
+- Tests for the Better Auth rules and the checkout against a throwaway MongoDB.
+
+### Changed
+
 - Payments are SSLCommerz only. The checkout has two steps (package, then pay) and one "Pay with
   SSLCommerz" button that sends the member to SSLCommerz's page (card, bKash, Nagad, Rocket or
   internet banking); it shows a notice instead when the server reports checkout as off. The

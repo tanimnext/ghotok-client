@@ -50,7 +50,8 @@ export const accountApi = {
 
 export const billingApi = {
   catalogue: () => api.get('/packages'),
-  createPayment: (body) => api.post('/payments', body),
+  /** Starts an SSLCommerz checkout (this website's /api/checkout, src/server/checkout.js). */
+  createPayment: (body) => api.post('/checkout', body),
   myPayments: (page) => api.get('/payments/mine', { page }),
   paymentStatus: (invoiceNo) => api.get(`/payments/status/${encodeURIComponent(invoiceNo)}`),
   requestRefund: (body) => api.post('/refunds', body),

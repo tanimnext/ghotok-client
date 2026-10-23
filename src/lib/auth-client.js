@@ -1,22 +1,19 @@
 'use client';
 
 import { createAuthClient } from 'better-auth/react';
-import { emailOTPClient, inferAdditionalFields, phoneNumberClient } from 'better-auth/client/plugins';
-import { isValidPhone, normalizePhone } from '@/shared';
+import { adminClient, inferAdditionalFields } from 'better-auth/client/plugins';
 import { ApiError } from '@/shared/api-client';
 
-// Better Auth client. Sign-up, sign-in, sessions and passwords go through it; the
-// rest of the API uses lib/api. Requests go to /api/auth on this origin, which
-// next.config.mjs forwards to ghotok-server, so the session cookie is first-party.
+// Better Auth client. Sign-up, sign-in (email + password), sessions, passwords and the
+// admin's account tools go through it, to this website's own /api/auth (src/server/auth.js).
+// Everything else uses lib/api, which reaches ghotok-server.
 export const authClient = createAuthClient({
   basePath: '/api/auth',
   plugins: [
-    emailOTPClient(),
-    phoneNumberClient(),
-    // Fields ghotok-server adds to the Better Auth user (see its src/config/auth.js).
+    adminClient(),
+    // Fields src/server/auth.js adds to the Better Auth user.
     inferAdditionalFields({
       user: {
-        role: { type: 'string', input: false },
         language: { type: 'string', required: false },
         status: { type: 'string', input: false },
         connectionBalance: { type: 'number', input: false },
@@ -65,12 +62,4 @@ export function toAppUser(sessionData) {
 export function homeFor(user, next) {
   if (user?.role === 'admin') return next?.startsWith('/admin') ? next : '/admin';
   return next && !next.startsWith('/admin') ? next : '/dashboard';
-}
-
-/**
- * A Bangladeshi mobile number in the one form both apps store (01XXXXXXXXX), the
- * same normalisation ghotok-server applies, or null when it is not valid.
- */
-export function toPhoneNumber(input) {
-  return isValidPhone(input) ? normalizePhone(input) : null;
 }

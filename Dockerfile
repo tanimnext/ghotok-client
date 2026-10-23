@@ -3,6 +3,10 @@
 #   docker build --build-arg API_URL=http://ghotok-server:4000 \
 #     --build-arg NEXT_PUBLIC_SITE_URL=https://ghotok.com.bd \
 #     --build-arg NEXT_PUBLIC_IMGBB_API_KEY=... -t ghotok-client .
+#   docker run -p 3000:3000 -e MONGODB_URI=... -e BETTER_AUTH_SECRET=... \
+#     -e BETTER_AUTH_URL=https://ghotok.com.bd -e SSLCOMMERZ_ENABLED=true \
+#     -e SSLCOMMERZ_STORE_ID=... -e SSLCOMMERZ_STORE_PASSWORD=... ghotok-client
+# MONGODB_URI and BETTER_AUTH_SECRET must match ghotok-server's.
 
 FROM node:22-alpine AS build
 WORKDIR /app

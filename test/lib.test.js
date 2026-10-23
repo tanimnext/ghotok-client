@@ -29,13 +29,11 @@ describe('renderMarkdown', () => {
 
 describe('validators', () => {
   it('reports dictionary keys for invalid fields', () => {
-    expect(
-      validate({ identifier: 'nope', password: 'short' }, { identifier: 'identifier', password: 'password' }),
-    ).toEqual({
-      identifier: 'validation.identifier',
+    expect(validate({ email: 'nope', password: 'short' }, { email: 'email', password: 'password' })).toEqual({
+      email: 'validation.email',
       password: 'validation.password',
     });
-    expect(validate({ identifier: '01712345678' }, { identifier: 'identifier' })).toEqual({});
+    expect(validate({ email: 'rina@example.com' }, { email: 'email' })).toEqual({});
   });
 
   it('only allows same-site redirects', () => {

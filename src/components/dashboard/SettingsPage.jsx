@@ -263,8 +263,7 @@ function DeactivateCard() {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
   const deactivate = useMutation({
-    // Accounts made with a mobile code or Google have no password; the server only asks when there is one.
-    mutationFn: () => accountApi.deactivate({ password: password || undefined }),
+    mutationFn: () => accountApi.deactivate({ password }),
     onSuccess: () => {
       queryClient.clear();
       queryClient.setQueryData(AUTH_KEY, null);

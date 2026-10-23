@@ -2,6 +2,7 @@ import { Checkout } from '@/components/billing/Checkout';
 import { EmptyState } from '@/ui';
 import { getPublic, getPublicOr } from '@/lib/api/server';
 import { getTranslator } from '@/lib/preferences.server';
+import { checkoutEnabled } from '@/server/checkout';
 
 export async function generateMetadata() {
   const { t } = await getTranslator();
@@ -22,7 +23,12 @@ export default async function PackagesPage({ searchParams }) {
         <p className="text-[17px] leading-relaxed text-muted">{t('packages.sub')}</p>
       </div>
       {catalogue?.packages?.length ? (
-        <Checkout catalogue={catalogue} initialPackageId={packageId} settings={settings} />
+        <Checkout
+          catalogue={catalogue}
+          checkoutEnabled={checkoutEnabled()}
+          initialPackageId={packageId}
+          settings={settings}
+        />
       ) : (
         <EmptyState icon="card" title={t('packages.unavailable')} />
       )}

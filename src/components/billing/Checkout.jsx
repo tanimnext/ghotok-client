@@ -47,9 +47,9 @@ function Price({ pkg, lang, className = '' }) {
  * Buying a connection package: choose a package, then pay on SSLCommerz's page (card, bKash,
  * Nagad, Rocket or internet banking). SSLCommerz sends the member back to the receipt page,
  * and the connections are added as soon as the payment is confirmed.
- * @param {{ catalogue: object, initialPackageId?: string, settings?: { payments?: object, site?: object } }} props
+ * @param {{ catalogue: object, checkoutEnabled: boolean, initialPackageId?: string, settings?: { payments?: object, site?: object } }} props
  */
-export function Checkout({ catalogue: publicCatalogue, initialPackageId, settings = {} }) {
+export function Checkout({ catalogue: publicCatalogue, checkoutEnabled, initialPackageId, settings = {} }) {
   const { t, lang } = useT();
   const { user, isLoading } = useAuth();
   const errorMessage = useErrorMessage();
@@ -62,7 +62,6 @@ export function Checkout({ catalogue: publicCatalogue, initialPackageId, setting
   });
   const catalogue = (user && mine.data) || publicCatalogue;
   const { packages } = catalogue;
-  const checkoutEnabled = catalogue.checkout?.enabled !== false;
   const { approvalGift = 0, approvedDiscountPercent = 0 } = settings.payments ?? {};
 
   const defaultPackage =

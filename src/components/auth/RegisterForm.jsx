@@ -7,58 +7,44 @@ import { useState } from 'react';
 import { Button, FormMessage, TextInput } from '@/ui';
 import { useRefreshAuth } from '@/hooks/use-auth';
 import { useErrorMessage } from '@/hooks/use-error-message';
-import { authCall, authClient, toPhoneNumber } from '@/lib/auth-client';
+import { authCall, authClient, homeFor } from '@/lib/auth-client';
 import { validate } from '@/lib/validators';
 import { useT } from '@/providers/PreferencesProvider';
 import { AuthCard } from './AuthCard.jsx';
-import { GoogleSignIn } from './GoogleSignIn.jsx';
-import { sendVerificationCode } from './sign-in.js';
 
 /**
- * Creates an account with Better Auth (email and password, optional mobile number).
- * Every new account is a member (`user`); the member is signed in straight away and
- * asked to confirm their email with a code.
+ * Creates an account with Better Auth (name, email and password). Every new account is a
+ * member (`user`) and is signed in straight away.
  */
-export function RegisterForm({ googleEnabled = false }) {
+export function RegisterForm() {
   const { t, lang } = useT();
   const router = useRouter();
   const refreshAuth = useRefreshAuth();
   const errorMessage = useErrorMessage();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
 
   const register = useMutation({
     mutationFn: async () => {
-      const email = form.email.trim().toLowerCase();
-      const phoneNumber = toPhoneNumber(form.phone) ?? undefined;
       await authCall(
         authClient.signUp.email({
           name: form.name.trim(),
-          email,
+          email: form.email.trim().toLowerCase(),
           password: form.password,
-          phoneNumber,
           language: lang,
         }),
       );
-      await refreshAuth();
-      // The account works already; the code only confirms the email. A failed send is not fatal.
-      await sendVerificationCode({ email }).catch(() => undefined);
-      return email;
+      return refreshAuth();
     },
-    onSuccess: (email) => {
-      router.push(`/verify?email=${encodeURIComponent(email)}&next=/dashboard/biodata`);
+    onSuccess: (user) => {
+      router.push(homeFor(user));
       router.refresh();
     },
   });
 
   const submit = (e) => {
     e.preventDefault();
-    const found = validate(form, {
-      name: 'name',
-      email: 'email',
-      phone: 'optionalPhone',
-      password: 'password',
-    });
+    const found = validate(form, { name: 'name', email: 'email', password: 'password' });
     setErrors(found);
     if (!Object.keys(found).length) register.mutate();
   };
@@ -98,17 +84,6 @@ export function RegisterForm({ googleEnabled = false }) {
           required
         />
         <TextInput
-          label={t('auth.phone')}
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="01XXXXXXXXX"
-          hint={t('auth.phoneOptional')}
-          value={form.phone}
-          onChange={set('phone')}
-          error={err('phone')}
-        />
-        <TextInput
           label={t('auth.password')}
           type="password"
           autoComplete="new-password"
@@ -133,7 +108,6 @@ export function RegisterForm({ googleEnabled = false }) {
           {t('auth.register')}
         </Button>
       </form>
-      {googleEnabled && <GoogleSignIn />}
     </AuthCard>
   );
 }

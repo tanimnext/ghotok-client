@@ -1,8 +1,10 @@
+import { authCall, authClient } from '@/lib/auth-client';
 import { api } from '@/shared/api-client';
 
 // One function per admin API endpoint, grouped by area. Pages call these and
 // never build URLs themselves. See ghotok-server's docs/API.md for the server side.
-// Signing in and out uses the Better Auth client (src/lib/auth-client.js).
+// Signing in and out, creating accounts and setting passwords use Better Auth on this
+// website (src/lib/auth-client.js and its admin plugin), because they need its password hashing.
 
 export const adminApi = {
   overview: () => api.get('/admin/overview'),
@@ -26,8 +28,14 @@ export const adminApi = {
   users: (query) => api.get('/admin/users', query),
   user: (id) => api.get(`/admin/users/${id}`),
   updateUser: (id, body) => api.patch(`/admin/users/${id}`, body),
-  createUser: (body) => api.post('/admin/users', body),
-  resetUserPassword: (id, password) => api.post(`/admin/users/${id}/reset-password`, { password }),
+  /** Creates an email + password account (Better Auth admin plugin); admin-made accounts count as verified. */
+  createUser: ({ name, email, password, role }) =>
+    authCall(authClient.admin.createUser({ name, email, password, role, data: { emailVerified: true } })),
+  /** Sets a new password and signs the user out of every device. */
+  resetUserPassword: async (userId, newPassword) => {
+    await authCall(authClient.admin.setUserPassword({ userId, newPassword }));
+    await authCall(authClient.admin.revokeUserSessions({ userId }));
+  },
 
   payments: (query) => api.get('/admin/payments', query),
   refunds: (query) => api.get('/admin/refunds', query),

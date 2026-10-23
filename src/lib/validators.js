@@ -7,12 +7,10 @@ import { isValidEmail, isValidPhone } from '@/shared';
 export const validators = {
   required: (v) => (String(v ?? '').trim() ? null : 'validation.required'),
   name: (v) => (String(v ?? '').trim().length >= 2 ? null : 'validation.name'),
-  identifier: (v) => (isValidEmail(v) || isValidPhone(v) ? null : 'validation.identifier'),
   email: (v) => (isValidEmail(v) ? null : 'validation.email'),
   optionalEmail: (v) => (!v || isValidEmail(v) ? null : 'validation.email'),
   optionalPhone: (v) => (!v || isValidPhone(v) ? null : 'validation.phone'),
   password: (v) => (String(v ?? '').length >= 8 ? null : 'validation.password'),
-  code: (v) => (/^\d{6}$/.test(String(v ?? '').trim()) ? null : 'validation.code'),
   message: (v) => (String(v ?? '').trim().length >= 10 ? null : 'validation.message'),
 };
 

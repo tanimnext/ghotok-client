@@ -4,11 +4,12 @@ const API_URL = process.env.API_URL || 'http://localhost:4000';
 const nextConfig = {
   poweredByHeader: false,
   output: 'standalone',
-  // The browser always talks to /api on this origin (including Better Auth at
-  // /api/auth); Next.js forwards it to ghotok-server, so the session cookie is
-  // first-party and BETTER_AUTH_URL on the server is this website's URL.
+  // The browser always talks to /api on this origin. This app's own route handlers answer
+  // first (Better Auth at /api/auth, SSLCommerz checkout at /api/checkout); everything else
+  // is forwarded to ghotok-server. A `fallback` rewrite runs only when no route matched,
+  // dynamic routes such as /api/auth/[...all] included.
   async rewrites() {
-    return [{ source: '/api/:path*', destination: `${API_URL}/api/:path*` }];
+    return { fallback: [{ source: '/api/:path*', destination: `${API_URL}/api/:path*` }] };
   },
   async headers() {
     return [

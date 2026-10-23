@@ -21,21 +21,11 @@ function CreateUser({ onClose }) {
   const errorMessage = useErrorMessage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    role: 'user',
-  });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user' });
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const create = useMutation({
     mutationFn: () =>
-      adminApi.createUser({
-        ...form,
-        email: form.email.trim(),
-        phoneNumber: form.phoneNumber.trim() || undefined,
-      }),
+      adminApi.createUser({ ...form, name: form.name.trim(), email: form.email.trim().toLowerCase() }),
     onSuccess: ({ user }) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       onClose();
@@ -79,13 +69,6 @@ function CreateUser({ onClose }) {
           required
           value={form.email}
           onChange={set('email')}
-        />
-        <TextInput
-          label={t('users.phone')}
-          type="tel"
-          placeholder="01XXXXXXXXX"
-          value={form.phoneNumber}
-          onChange={set('phoneNumber')}
         />
         <TextInput
           label={t('users.password')}
