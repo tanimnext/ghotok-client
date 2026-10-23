@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router';
 import {
   BIODATA_STATUS,
   LEDGER_TYPES,
-  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
   PAYMENT_STATUS,
   ROLE_OPTIONS,
   USER_STATUS_OPTIONS,
@@ -216,7 +216,7 @@ export function UserPage() {
                     {payments.map((p) => (
                       <tr key={p.id}>
                         <td className="font-mono text-[13px]">{p.invoiceNo}</td>
-                        <td>{optionLabel(PAYMENT_METHODS, p.method, lang)}</td>
+                        <td>{optionLabel(PAYMENT_METHOD_LABELS, p.method, lang)}</td>
                         <td className="font-mono text-[13px]">{p.trxId ?? '—'}</td>
                         <td className="font-bold">{taka(p.amount, lang)}</td>
                         <td className="whitespace-nowrap">{date(p.createdAt, lang)}</td>

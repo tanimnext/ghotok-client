@@ -185,22 +185,34 @@ export const DELETE_REASONS = [
   { value: 'other', en: 'Other', bn: 'অন্যান্য' },
 ];
 
+// Every payment goes through SSLCommerz (cards, bKash, Nagad, Rocket, internet banking).
 export const PAYMENT_METHODS = [
+  {
+    value: 'sslcommerz',
+    en: 'SSLCommerz (card, bKash, Nagad, Rocket, bank)',
+    bn: 'SSLCommerz (কার্ড, বিকাশ, নগদ, রকেট, ব্যাংক)',
+  },
+];
+
+// Methods of payments made before SSLCommerz became the only option; only for labelling them.
+export const LEGACY_PAYMENT_METHODS = [
   { value: 'bkash', en: 'bKash', bn: 'বিকাশ' },
   { value: 'nagad', en: 'Nagad', bn: 'নগদ' },
   { value: 'rocket', en: 'Rocket', bn: 'রকেট' },
-  // Online checkout only: cards, mobile banking and internet banking through SSLCommerz.
-  { value: 'sslcommerz', en: 'Card / mobile banking', bn: 'কার্ড / মোবাইল ব্যাংকিং', gatewayOnly: true },
 ];
+
+/** Labels for any stored payment's method, old ones included. */
+export const PAYMENT_METHOD_LABELS = [...PAYMENT_METHODS, ...LEGACY_PAYMENT_METHODS];
 
 export const PAYMENT_STATUS = [
   { value: 'initiated', en: 'Awaiting payment', bn: 'পেমেন্টের অপেক্ষায়' },
-  { value: 'pending', en: 'Pending review', bn: 'যাচাইয়ের অপেক্ষায়' },
-  { value: 'verified', en: 'Verified', bn: 'যাচাইকৃত' },
-  { value: 'rejected', en: 'Rejected', bn: 'বাতিল' },
+  { value: 'verified', en: 'Paid', bn: 'পরিশোধিত' },
   { value: 'failed', en: 'Failed', bn: 'ব্যর্থ' },
   { value: 'cancelled', en: 'Cancelled', bn: 'বাতিলকৃত' },
   { value: 'refunded', en: 'Refunded', bn: 'রিফান্ডকৃত' },
+  // Older manual payments only.
+  { value: 'pending', en: 'Pending review', bn: 'যাচাইয়ের অপেক্ষায়' },
+  { value: 'rejected', en: 'Rejected', bn: 'বাতিল' },
 ];
 
 export const REFUND_STATUS = [

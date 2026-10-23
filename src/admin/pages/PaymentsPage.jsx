@@ -1,27 +1,26 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { PAYMENT_METHODS, PAYMENT_STATUS, optionLabel } from '@/shared';
+import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS, optionLabel } from '@/shared';
 import { dateTime, digits, taka } from '@/shared/format';
 import { Pill, STATUS_TONE, Tabs } from '@/ui';
 import { DataCard } from '../components/DataCard.jsx';
 import { PageHeader } from '../components/PageHeader.jsx';
-import { PaymentDecision } from '../components/PaymentDecision.jsx';
 import { UserCell } from '../components/UserCell.jsx';
 import { usePageParam, useQueryParam } from '../hooks/useQueryParam.js';
 import { adminApi } from '../lib/api.js';
 import { useT } from '../providers/PreferencesProvider.jsx';
 
-const TABS = ['pending', 'verified', 'rejected', 'refunded', 'all'];
-const COLUMNS = ['invoice', 'user', 'method', 'trx', 'package', 'amount', 'status', 'decision'];
+// Read-only: SSLCommerz decides whether a payment succeeded and the API credits it by itself.
+const TABS = ['verified', 'failed', 'cancelled', 'refunded', 'all'];
+const COLUMNS = ['invoice', 'user', 'method', 'trx', 'package', 'amount', 'status'];
 
 export function PaymentsPage() {
   const { t, lang } = useT();
-  const [status, setStatus] = useQueryParam('status', 'pending');
-  const [method, setMethod] = useQueryParam('method');
+  const [status, setStatus] = useQueryParam('status', 'verified');
   const [q, setQ] = useQueryParam('q');
   const [page, setPage] = usePageParam();
   const query = useQuery({
-    queryKey: ['payments', status, method, q, page],
-    queryFn: () => adminApi.payments({ status: status === 'all' ? undefined : status, method, q, page }),
+    queryKey: ['payments', status, q, page],
+    queryFn: () => adminApi.payments({ status: status === 'all' ? undefined : status, q, page }),
     placeholderData: keepPreviousData,
   });
 
@@ -41,26 +40,11 @@ export function PaymentsPage() {
           onKeyDown={(e) => e.key === 'Enter' && setQ(e.currentTarget.value.trim())}
           className="h-11 min-w-64 flex-1 rounded-full border border-line bg-surface px-5 text-sm"
         />
-        <select
-          value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          className="field-input min-h-11 w-auto py-2"
-          aria-label={t('payments.cols.method')}
-        >
-          <option value="">
-            {t('payments.cols.method')}: {t('common.all')}
-          </option>
-          {PAYMENT_METHODS.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m[lang]}
-            </option>
-          ))}
-        </select>
       </div>
       <DataCard query={query} page={page} onPage={setPage}>
         {(items) => (
           <div className="overflow-x-auto">
-            <table className="table-admin min-w-[980px]">
+            <table className="table-admin min-w-[900px]">
               <thead>
                 <tr>
                   {COLUMNS.map((c) => (
@@ -78,16 +62,7 @@ export function PaymentsPage() {
                     <td>
                       <UserCell user={p.user} />
                     </td>
-                    <td>
-                      {optionLabel(PAYMENT_METHODS, p.method, lang)}
-                      <div className="text-xs text-muted">
-                        {p.mode === 'gateway' ? (
-                          t('payments.online')
-                        ) : (
-                          <span className="font-mono">{p.senderNumber}</span>
-                        )}
-                      </div>
-                    </td>
+                    <td>{optionLabel(PAYMENT_METHOD_LABELS, p.method, lang)}</td>
                     <td className="font-mono text-[13px]">{p.trxId ?? '—'}</td>
                     <td className="whitespace-nowrap">
                       {t('common.connections', { n: digits(p.connections, lang) })}
@@ -95,16 +70,7 @@ export function PaymentsPage() {
                     <td className="font-bold">{taka(p.amount, lang)}</td>
                     <td>
                       <Pill tone={STATUS_TONE[p.status]}>{optionLabel(PAYMENT_STATUS, p.status, lang)}</Pill>
-                    </td>
-                    <td className="max-w-56">
-                      {p.status === 'pending' ? (
-                        <PaymentDecision payment={p} />
-                      ) : (
-                        <span className="flex flex-col gap-0.5 text-xs text-muted">
-                          {p.reviewedBy && <span>{t('payments.reviewedBy', { name: p.reviewedBy })}</span>}
-                          {p.rejectReason && <span>{p.rejectReason}</span>}
-                        </span>
-                      )}
+                      {p.rejectReason && <div className="mt-1 text-xs text-muted">{p.rejectReason}</div>}
                     </td>
                   </tr>
                 ))}

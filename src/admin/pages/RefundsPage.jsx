@@ -1,6 +1,12 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PAYMENT_METHODS, PAYMENT_STATUS, REFUND_RESOLUTIONS, REFUND_STATUS, optionLabel } from '@/shared';
+import {
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_STATUS,
+  REFUND_RESOLUTIONS,
+  REFUND_STATUS,
+  optionLabel,
+} from '@/shared';
 import { date, digits, taka } from '@/shared/format';
 import {
   Button,
@@ -166,7 +172,7 @@ export function RefundsPage() {
                   <div className="flex flex-wrap gap-x-6 gap-y-1 rounded-2xl bg-surface2 px-4 py-3 text-sm">
                     <span className="font-mono">{r.payment.invoiceNo}</span>
                     <span>
-                      {optionLabel(PAYMENT_METHODS, r.payment.method, lang)}{' '}
+                      {optionLabel(PAYMENT_METHOD_LABELS, r.payment.method, lang)}{' '}
                       {r.payment.trxId && <span className="font-mono">· {r.payment.trxId}</span>}
                     </span>
                     <span>{t('common.connections', { n: digits(r.payment.connections, lang) })}</span>

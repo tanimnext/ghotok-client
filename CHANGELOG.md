@@ -4,6 +4,20 @@ All notable changes to this project are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Payments are SSLCommerz only. The checkout has two steps (package, then pay) and one "Pay with
+  SSLCommerz" button that sends the member to SSLCommerz's page (card, bKash, Nagad, Rocket or
+  internet banking); it shows a notice instead when the server reports checkout as off. The
+  payment method picker and the "Send Money + transaction ID" form are gone.
+- Admin: the payments page is a read-only list (paid, failed, cancelled, refunded) without
+  verify/reject; the overview shows the latest payments; the payment settings keep only the
+  approval gift and the approved-member discount.
+- Older bKash/Nagad/Rocket and manual payments keep their labels in history, receipts and admin
+  lists.
+
 ## [1.0.0] - 2026-10-21
 
 First release as a standalone client, split from the ghotok-claude monorepo.

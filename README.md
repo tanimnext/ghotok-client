@@ -68,6 +68,15 @@ who has them, which is why ID cards and other private documents must never go th
 Without `NEXT_PUBLIC_IMGBB_API_KEY` the rest of the site works; image uploads report that they
 are not set up.
 
+## Payments
+
+Members pay only through SSLCommerz (card, bKash, Nagad, Rocket or internet banking). The checkout
+(`src/components/billing/Checkout.jsx`) asks the API to start a payment and sends the browser to
+the SSLCommerz page it returns; SSLCommerz brings the member back to
+`/dashboard/payment/<invoice>`, which waits for the server to confirm the payment. Until the
+server has SSLCommerz settings, the packages page shows that online payment is unavailable. See
+the ghotok-server README for the SSLCommerz sandbox setup.
+
 ## Getting started
 
 Requirements: Node.js 22.12+ (`nvm use`) and a running ghotok-server.

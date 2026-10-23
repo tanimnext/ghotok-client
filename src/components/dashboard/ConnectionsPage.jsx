@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useState } from 'react';
-import { LEDGER_TYPES, PAYMENT_METHODS, PAYMENT_STATUS, REFUND_STATUS, optionLabel } from '@/shared';
+import { LEDGER_TYPES, PAYMENT_METHOD_LABELS, PAYMENT_STATUS, REFUND_STATUS, optionLabel } from '@/shared';
 import {
   Button,
   Card,
@@ -147,7 +147,7 @@ export function ConnectionsPage({ paymentResult }) {
                         </Link>
                       </div>
                     </td>
-                    <td className={td}>{optionLabel(PAYMENT_METHODS, p.method, lang)}</td>
+                    <td className={td}>{optionLabel(PAYMENT_METHOD_LABELS, p.method, lang)}</td>
                     <td className={`${td} font-mono text-sm`}>{p.trxId ?? '—'}</td>
                     <td className={`${td} font-bold`}>{taka(p.amount, lang)}</td>
                     <td className={td}>

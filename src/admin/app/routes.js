@@ -65,7 +65,7 @@ export const ROUTES = [
     path: '/payments',
     element: PaymentsPage,
     permission: 'payments.manage',
-    nav: { key: 'nav.payments', icon: 'card', group: 'money', badge: 'pendingPayments' },
+    nav: { key: 'nav.payments', icon: 'card', group: 'money' },
   },
   {
     path: '/refunds',

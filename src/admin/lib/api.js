@@ -30,8 +30,6 @@ export const adminApi = {
   resetUserPassword: (id, password) => api.post(`/admin/users/${id}/reset-password`, { password }),
 
   payments: (query) => api.get('/admin/payments', query),
-  verifyPayment: (id) => api.post(`/admin/payments/${id}/verify`),
-  rejectPayment: (id, reason) => api.post(`/admin/payments/${id}/reject`, { reason }),
   refunds: (query) => api.get('/admin/refunds', query),
   approveRefund: (id, body) => api.post(`/admin/refunds/${id}/approve`, body),
   rejectRefund: (id, note) => api.post(`/admin/refunds/${id}/reject`, { note }),

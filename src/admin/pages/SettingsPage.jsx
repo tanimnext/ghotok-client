@@ -1,17 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { PAYMENT_METHODS } from '@/shared';
-import {
-  Button,
-  Card,
-  FormMessage,
-  LoadingBlock,
-  SelectInput,
-  Switch,
-  Tabs,
-  TextInput,
-  useToast,
-} from '@/ui';
+import { Button, Card, FormMessage, LoadingBlock, Switch, Tabs, TextInput, useToast } from '@/ui';
 import { PageHeader } from '../components/PageHeader.jsx';
 import { useErrorMessage } from '../hooks/useErrorMessage.js';
 import { useQueryParam } from '../hooks/useQueryParam.js';
@@ -20,12 +9,9 @@ import { useT } from '../providers/PreferencesProvider.jsx';
 
 const TABS = ['site', 'payments', 'stats'];
 const SOCIAL = ['facebook', 'youtube', 'instagram', 'whatsapp'];
-const ACCOUNT_TYPES = ['personal', 'merchant', 'agent'];
 const TUTORIALS = ['createBiodata', 'buyConnections', 'viewContact'];
-// Methods paid by hand with "Send Money"; gateway-only methods (SSLCommerz) have no number.
-const MANUAL_METHODS = PAYMENT_METHODS.filter((m) => !m.gatewayOnly);
 
-/** Returns a copy of `obj` with the value at `path` (e.g. ['bkash', 'enabled']) replaced. */
+/** Returns a copy of `obj` with the value at `path` (e.g. ['tutorials', 'createBiodata']) replaced. */
 function setIn(obj, [key, ...rest], value) {
   return { ...obj, [key]: rest.length ? setIn(obj[key] ?? {}, rest, value) : value };
 }
@@ -41,7 +27,7 @@ function SwitchRow({ label, checked, onChange }) {
 
 /** One settings group: edits a copy and saves it as a whole. */
 function SettingsForm({ settingKey, initial }) {
-  const { t, lang } = useT();
+  const { t } = useT();
   const toast = useToast();
   const errorMessage = useErrorMessage();
   const queryClient = useQueryClient();
@@ -102,14 +88,7 @@ function SettingsForm({ settingKey, initial }) {
   } else if (settingKey === 'payments') {
     body = (
       <>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <TextInput
-            label={t('settings.verificationHours')}
-            type="number"
-            min={1}
-            max={72}
-            {...field('verificationHours')}
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextInput
             label={t('settings.approvalGift')}
             hint={t('settings.approvalGiftHint')}
@@ -127,27 +106,6 @@ function SettingsForm({ settingKey, initial }) {
             {...field('approvedDiscountPercent')}
           />
         </div>
-        {MANUAL_METHODS.map((m) => (
-          <fieldset key={m.value} className="flex flex-col gap-4 rounded-3xl border border-line p-5">
-            <SwitchRow
-              label={t('settings.methodEnabled', { method: m[lang] })}
-              {...toggle(m.value, 'enabled')}
-            />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <TextInput
-                label={t('settings.manualNumber', { method: m[lang] })}
-                type="tel"
-                placeholder="01XXXXXXXXX"
-                {...field(m.value, 'manualNumber')}
-              />
-              <SelectInput
-                label={t('settings.accountType')}
-                {...field(m.value, 'accountType')}
-                options={ACCOUNT_TYPES.map((a) => ({ value: a, label: t(`settings.accountTypes.${a}`) }))}
-              />
-            </div>
-          </fieldset>
-        ))}
         <FormMessage tone="info">{t('settings.gatewayNote')}</FormMessage>
       </>
     );

@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { PAYMENT_METHODS, REPORT_REASONS, REPORT_STATUS, optionLabel } from '@/shared';
-import { date, digits, taka } from '@/shared/format';
+import { PAYMENT_METHOD_LABELS, REPORT_REASONS, REPORT_STATUS, optionLabel } from '@/shared';
+import { date, dateTime, digits, taka } from '@/shared/format';
 import { Button, Card, LoadingBlock, Pill, STATUS_TONE } from '@/ui';
 import { AdjustConnectionsForm } from '../components/AdjustConnectionsForm.jsx';
 import { PageHeader } from '../components/PageHeader.jsx';
-import { PaymentDecision } from '../components/PaymentDecision.jsx';
 import { RestoreDecision } from '../components/RestoreDecision.jsx';
 import { UserCell } from '../components/UserCell.jsx';
 import { useCan } from '../hooks/useAuth.js';
@@ -13,7 +12,6 @@ import { adminApi } from '../lib/api.js';
 import { useT } from '../providers/PreferencesProvider.jsx';
 
 const KPI_ORDER = [
-  'pendingPayments',
   'pendingBiodatas',
   'openReports',
   'pendingRestores',
@@ -67,7 +65,7 @@ export function OverviewPage() {
               <table className="table-admin min-w-[640px]">
                 <thead>
                   <tr>
-                    {['user', 'method', 'trx', 'package', 'amount', 'decision'].map((c) => (
+                    {['user', 'method', 'trx', 'package', 'amount', 'date'].map((c) => (
                       <th key={c}>{t(`payments.cols.${c}`)}</th>
                     ))}
                   </tr>
@@ -78,12 +76,12 @@ export function OverviewPage() {
                       <td>
                         <UserCell user={p.user} />
                       </td>
-                      <td>{optionLabel(PAYMENT_METHODS, p.method, lang)}</td>
+                      <td>{optionLabel(PAYMENT_METHOD_LABELS, p.method, lang)}</td>
                       <td className="font-mono">{p.trxId}</td>
                       <td>{t('common.connections', { n: digits(p.connections, lang) })}</td>
                       <td className="font-bold">{taka(p.amount, lang)}</td>
-                      <td>
-                        <PaymentDecision payment={p} />
+                      <td className="whitespace-nowrap text-muted">
+                        {dateTime(p.creditedAt ?? p.createdAt, lang)}
                       </td>
                     </tr>
                   ))}

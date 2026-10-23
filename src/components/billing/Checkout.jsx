@@ -1,12 +1,11 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useState } from 'react';
-import { isValidPhone } from '@/shared';
-import { Button, Card, FormMessage, Icon, TextInput } from '@/ui';
+import { Button, Card, FormMessage, Icon } from '@/ui';
 import { TutorialLink } from '@/components/content/TutorialLink';
-import { AUTH_KEY, useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import { useErrorMessage } from '@/hooks/use-error-message';
 import { billingApi } from '@/lib/api/endpoints';
 import { digits, number, taka } from '@/lib/format';
@@ -32,20 +31,6 @@ function Choice({ checked, onChange, name, children, disabled }) {
   );
 }
 
-/** Instructions text with <b> emphasis from the dictionary, rendered safely. */
-function Rich({ text }) {
-  const parts = text.split(/(<b>.*?<\/b>)/g);
-  return parts.map((part, i) =>
-    part.startsWith('<b>') ? (
-      <b key={i} className="text-ink">
-        {part.slice(3, -4)}
-      </b>
-    ) : (
-      part
-    ),
-  );
-}
-
 /** A package price, with the original struck through when the member has a discount. */
 function Price({ pkg, lang, className = '' }) {
   if (!pkg.finalPrice || pkg.finalPrice === pkg.price)
@@ -59,16 +44,14 @@ function Price({ pkg, lang, className = '' }) {
 }
 
 /**
- * Buying a connection package in three steps: package, method, payment.
- * With a configured gateway (bKash/Nagad/SSLCommerz) the member can pay online;
- * otherwise — and always for Rocket — they send money and submit the transaction ID.
- * SSLCommerz (cards and mobile banking) is online only.
+ * Buying a connection package: choose a package, then pay on SSLCommerz's page (card, bKash,
+ * Nagad, Rocket or internet banking). SSLCommerz sends the member back to the receipt page,
+ * and the connections are added as soon as the payment is confirmed.
  * @param {{ catalogue: object, initialPackageId?: string, settings?: { payments?: object, site?: object } }} props
  */
 export function Checkout({ catalogue: publicCatalogue, initialPackageId, settings = {} }) {
   const { t, lang } = useT();
   const { user, isLoading } = useAuth();
-  const queryClient = useQueryClient();
   const errorMessage = useErrorMessage();
   // The server renders the guest catalogue; a signed-in member's prices may include a discount.
   const mine = useQuery({
@@ -78,61 +61,24 @@ export function Checkout({ catalogue: publicCatalogue, initialPackageId, setting
     staleTime: 60_000,
   });
   const catalogue = (user && mine.data) || publicCatalogue;
-  const { packages, methods, verificationHours } = catalogue;
-  const enabledMethods = methods.filter((m) => m.enabled);
+  const { packages } = catalogue;
+  const checkoutEnabled = catalogue.checkout?.enabled !== false;
   const { approvalGift = 0, approvedDiscountPercent = 0 } = settings.payments ?? {};
 
   const defaultPackage =
     packages.find((p) => p.id === initialPackageId) ?? packages.find((p) => p.highlight) ?? packages[0];
   const [packageId, setPackageId] = useState(defaultPackage?.id);
-  const [method, setMethod] = useState(enabledMethods[0]?.value);
-  const [form, setForm] = useState({ senderNumber: '', trxId: '' });
-  const [errors, setErrors] = useState({});
-  const [done, setDone] = useState(null);
 
   const pkg = packages.find((p) => p.id === packageId);
-  const m = methods.find((x) => x.value === method);
-  const methodName = m?.[lang] ?? '';
   const price = pkg?.finalPrice ?? pkg?.price;
 
   const pay = useMutation({
-    mutationFn: (mode) =>
-      billingApi.createPayment({ packageId, method, mode, ...(mode === 'manual' ? form : {}) }),
-    onSuccess: (result) => {
-      if (result.redirectURL) {
-        window.location.assign(result.redirectURL);
-        return;
-      }
-      setDone(result.payment);
-      queryClient.invalidateQueries({ queryKey: AUTH_KEY });
-    },
+    mutationFn: () => billingApi.createPayment({ packageId }),
+    // Off to SSLCommerz; the member comes back to /dashboard/payment/<invoice>.
+    onSuccess: (result) => window.location.assign(result.redirectURL),
   });
 
-  const submitManual = (e) => {
-    e.preventDefault();
-    const next = {};
-    if (!isValidPhone(form.senderNumber)) next.senderNumber = t('packages.errSender');
-    if (!/^[A-Za-z0-9]{6,20}$/.test(form.trxId.trim())) next.trxId = t('packages.errTrx');
-    setErrors(next);
-    if (!Object.keys(next).length) pay.mutate('manual');
-  };
-
   if (!pkg) return null;
-
-  if (done) {
-    return (
-      <Card className="items-start">
-        <span className="flex size-14 items-center justify-center rounded-full bg-sage-bg text-sage">
-          <Icon name="check" size={28} strokeWidth={2.6} />
-        </span>
-        <h2 className="font-display text-3xl font-medium">{t('packages.successTitle')}</h2>
-        <p className="max-w-xl text-muted">
-          {t('packages.successText', { trx: done.trxId, n: digits(done.connections, lang) })}
-        </p>
-        <Button href="/dashboard/connections">{t('packages.goBilling')}</Button>
-      </Card>
-    );
-  }
 
   return (
     <div className="flex flex-col items-start gap-7 lg:flex-row">
@@ -176,100 +122,29 @@ export function Checkout({ catalogue: publicCatalogue, initialPackageId, setting
         </Card>
 
         <Card title={t('packages.step2')}>
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
-            {methods.map((x) => (
-              <Choice
-                key={x.value}
-                name="method"
-                checked={x.value === method}
-                disabled={!x.enabled}
-                onChange={() => setMethod(x.value)}
-              >
-                <span className="text-base font-bold">{x[lang]}</span>
-                {x.gatewayOnly && x.enabled && (
-                  <span className="text-xs text-muted">{t('packages.cardsNote')}</span>
-                )}
-                {!x.enabled && <span className="text-xs text-muted">{t('packages.unavailable')}</span>}
-              </Choice>
-            ))}
-          </div>
-        </Card>
-
-        <Card title={t(m?.gatewayOnly ? 'packages.step3Online' : 'packages.step3')}>
-          {!isLoading && !user ? (
+          {!checkoutEnabled ? (
+            <p className="flex items-start gap-3 rounded-[20px] bg-surface2 p-5 text-[15px] leading-relaxed text-muted">
+              <Icon name="card" size={20} className="mt-0.5 flex-none" />
+              {t('packages.checkoutOff')}
+            </p>
+          ) : !isLoading && !user ? (
             <Button href="/login?next=/packages" size="lg">
               {t('packages.loginFirst')}
             </Button>
           ) : (
-            <>
+            <div className="flex flex-col gap-4">
+              <p className="text-[15px] leading-relaxed text-muted">{t('packages.payNote')}</p>
               <FormMessage>{pay.error && errorMessage(pay.error)}</FormMessage>
-              {m?.gateway && (
-                <div className="flex flex-col gap-3 rounded-[20px] bg-surface2 p-5">
-                  <p className="text-sm text-muted">{t('packages.onlineNote', { method: methodName })}</p>
-                  <Button
-                    size="lg"
-                    loading={pay.isPending && pay.variables === 'gateway'}
-                    onClick={() => pay.mutate('gateway')}
-                  >
-                    {t('packages.onlineCheckout', { method: methodName })}
-                  </Button>
-                  {!m.gatewayOnly && (
-                    <span className="pt-2 text-center text-sm font-semibold text-muted">
-                      {t('packages.or')}
-                    </span>
-                  )}
-                </div>
-              )}
-              {!m?.gatewayOnly && (
-                <>
-                  <ol className="flex list-decimal flex-col gap-2 pl-5 text-[15px] leading-relaxed text-muted">
-                    <li>
-                      <Rich
-                        text={t(
-                          m?.manualNumber ? 'packages.instructions1' : 'packages.instructions1NoNumber',
-                          {
-                            method: methodName,
-                            number: m?.manualNumber,
-                            amount: number(price, lang),
-                          },
-                        )}
-                      />
-                    </li>
-                    <li>{t('packages.instructions2')}</li>
-                    <li>{t('packages.instructions3', { hours: digits(verificationHours, lang) })}</li>
-                  </ol>
-                  <form className="flex flex-col gap-4" onSubmit={submitManual} noValidate>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <TextInput
-                        label={t('packages.senderNumber', { method: methodName })}
-                        type="tel"
-                        inputMode="tel"
-                        autoComplete="tel"
-                        placeholder="01XXXXXXXXX"
-                        required
-                        value={form.senderNumber}
-                        error={errors.senderNumber}
-                        onChange={(e) => setForm((f) => ({ ...f, senderNumber: e.target.value }))}
-                      />
-                      <TextInput
-                        label={t('packages.trxId')}
-                        placeholder={t('packages.trxPh')}
-                        required
-                        autoCapitalize="characters"
-                        value={form.trxId}
-                        error={errors.trxId}
-                        onChange={(e) => setForm((f) => ({ ...f, trxId: e.target.value }))}
-                      />
-                    </div>
-                    <Button type="submit" size="lg" loading={pay.isPending && pay.variables === 'manual'}>
-                      {t('packages.submit')}
-                    </Button>
-                  </form>
-                </>
-              )}
-              <TutorialLink topic="buyConnections" className="self-start" />
-            </>
+              <Button size="lg" loading={pay.isPending || pay.isSuccess} onClick={() => pay.mutate()}>
+                {t('packages.payWith', { amount: taka(price, lang) })}
+              </Button>
+              <p className="flex items-center gap-2 text-sm text-muted">
+                <Icon name="shield" size={16} />
+                {t('packages.secureNote')}
+              </p>
+            </div>
           )}
+          <TutorialLink topic="buyConnections" className="self-start" />
         </Card>
       </div>
 
@@ -291,7 +166,7 @@ export function Checkout({ catalogue: publicCatalogue, initialPackageId, setting
           )}
           <div className="flex justify-between text-[15px] text-panel-muted">
             <span>{t('packages.method')}</span>
-            <span>{methodName}</span>
+            <span>SSLCommerz</span>
           </div>
           <div className="flex justify-between border-t border-panel-line pt-4 text-xl font-extrabold">
             <span>{t('packages.total')}</span>

@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { PAYMENT_METHODS, PAYMENT_STATUS, optionLabel } from '@/shared';
+import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS, optionLabel } from '@/shared';
 import { Button, Card, EmptyState, FormMessage, Icon, LoadingBlock, Pill, STATUS_TONE } from '@/ui';
 import { AUTH_KEY } from '@/hooks/use-auth';
 import { billingApi } from '@/lib/api/endpoints';
@@ -61,7 +61,7 @@ export function PaymentReceipt({ invoiceNo, result }) {
     ['receipt.invoice', payment.invoiceNo],
     ['receipt.date', dateTime(payment.createdAt, lang)],
     ['receipt.package', t('common.connections', { n: digits(payment.connections, lang) })],
-    ['receipt.method', optionLabel(PAYMENT_METHODS, payment.method, lang)],
+    ['receipt.method', optionLabel(PAYMENT_METHOD_LABELS, payment.method, lang)],
     ['receipt.trx', payment.trxId ?? '—'],
     ['receipt.amount', taka(payment.amount, lang)],
   ];
